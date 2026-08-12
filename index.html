@@ -184,6 +184,7 @@
     </div>
     <script>
         // =========替换为你的Railway接口地址=========
+        // =========替换为你的Railway接口地址=========
         const apiUrl = "https://wish-api-production-d543.up.railway.app/submit";
         // ==========================================
         const wrap = document.getElementById('cardWrap');
@@ -194,12 +195,9 @@
                 wrap.classList.toggle('open');
             }
         })
-        // 本地缓存心愿
-        const savedWish = localStorage.getItem('wishGift');
-        if(savedWish) wishInput.value = savedWish;
-        wishInput.addEventListener('input', function(){
-            localStorage.setItem('wishGift', this.value);
-        });
+        
+        // 【已删除本地缓存读写代码，不再记住上次输入】
+        
         // 提交请求
         submitBtn.onclick = async function(){
             const wish = wishInput.value.trim();
@@ -215,8 +213,7 @@
                 const data = await res.json();
                 if(data.success){
                     alert("心愿提交成功！我已经收到啦");
-                    wishInput.value = "";          // ✅ 清空输入框
-                    localStorage.removeItem('wishGift'); // 清除本地缓存
+                    wishInput.value = ""; // 提交成功清空输入框
                 }else{
                     alert("提交失败："+data.msg);
                 }
@@ -241,6 +238,7 @@
             setTimeout(()=>heart.remove(), duration * 1000);
         }
         setInterval(createHeart, 130);
+
     </script>
 </body>
 </html>
