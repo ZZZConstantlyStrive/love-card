@@ -12,15 +12,17 @@
             padding: 0;
             box-sizing: border-box;
             font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-text-size-adjust: 100%; /* 禁止苹果手机自动放大文字 */
+            -webkit-text-size-adjust: 100%;
         }
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #ffd6e0, #ffe8cc);
+            /* 优化Safari渐变偏色 */
+            background: #ffe8cc;
+            background-image: linear-gradient(135deg, #ffd6e0 0%, #ffe8cc 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 24px 16px;
             overflow: hidden;
         }
         .heart-container {
@@ -52,8 +54,8 @@
         }
         .flip-wrap {
             width: 100%;
-            max-width: 420px;
-            max-height: 88vh; /* 核心：手机限制最大高度，不会超出屏幕 */
+            max-width: 380px;  /* 缩小卡片最大宽度 */
+            max-height: 82vh;
             perspective: 1200px;
             cursor: pointer;
             z-index: 2;
@@ -62,9 +64,10 @@
             position: relative;
             width: 100%;
             height: 0;
-            padding-bottom: 155%; /* 宽高比例，自适应屏幕替代固定660px */
+            padding-bottom: 158%;
             transition: transform 0.8s ease-in-out;
             transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
         }
         .flip-wrap.open .flip-card {
             transform: rotateY(180deg);
@@ -75,61 +78,61 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 22px;
-            box-shadow: 0 10px 30px rgba(255, 126, 159, 0.25);
+            border-radius: 20px;
+            box-shadow: 0 8px 26px rgba(255, 126, 159, 0.22);
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: clamp(24px,5vw,40px) clamp(20px,4vw,32px);
-            background: #fff;
-            -webkit-backface-visibility: hidden; /* Safari兼容 */
+            padding: clamp(20px,4.5vw,34px) clamp(18px,3.5vw,28px);
+            background: #ffffff;
         }
         .front-icon {
-            font-size: clamp(64px,14vw,90px);
-            margin-bottom: 16px;
+            font-size: clamp(56px,12vw,78px);
+            margin-bottom: 14px;
         }
         .front-tip {
-            font-size: clamp(16px,4vw,20px);
+            font-size: clamp(15px,3.6vw,18px);
             color: #d65c7b;
         }
         .card-back {
             transform: rotateY(180deg);
         }
         .card-title {
-            font-size: clamp(22px,5vw,26px);
+            font-size: clamp(20px,4.6vw,24px);
             color: #d65c7b;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-weight: bold;
         }
         .decor-line {
-            width: 80px;
+            width: 72px;
             height: 2px;
             background: #ffb6c1;
-            margin: 0 auto 20px;
+            margin: 0 auto 18px;
             border-radius: 1px;
         }
         .text-item {
-            font-size: clamp(15px,3.6vw,17px);
+            font-size: clamp(14px,3.3vw,16px);
             color: #444;
-            line-height: 2;
+            line-height: 1.9;
             width: 100%;
             text-align: left;
         }
         .blessing {
-            margin: 14px 0;
-            font-size: clamp(13px,3.2vw,15px);
+            margin: 12px 0;
+            font-size: clamp(12px,3vw,14px);
             color: #666;
-            line-height: 1.7;
+            line-height: 1.65;
             text-align: center;
         }
         .input-box {
             width: 100%;
-            height: 48px;
+            height: 46px;
             border: 1px solid #d65c7b;
             border-radius: 8px;
-            margin-top: 12px;
+            margin-top: 10px;
             padding: 0 14px;
             font-size: 16px;
             outline: none;
@@ -140,13 +143,13 @@
             box-shadow: 0 0 0 2px rgba(255,123,156,0.2);
         }
         .submit-btn{
-            margin-top:14px;
-            padding:10px 26px;
+            margin-top:12px;
+            padding:9px 24px;
             border:none;
             background:#d65c7b;
             color:#fff;
             border-radius:8px;
-            font-size:16px;
+            font-size:15px;
             cursor:pointer;
             transition: opacity 0.2s;
         }
@@ -212,6 +215,8 @@
                 const data = await res.json();
                 if(data.success){
                     alert("心愿提交成功！我已经收到啦");
+                    wishInput.value = "";          // ✅ 清空输入框
+                    localStorage.removeItem('wishGift'); // 清除本地缓存
                 }else{
                     alert("提交失败："+data.msg);
                 }
@@ -221,13 +226,13 @@
             submitBtn.disabled = false;
             submitBtn.innerText = "提交心愿";
         }
-        // 爱心动画
+        // 爱心动画（略微降低频率，手机更流畅）
         const heartBox = document.getElementById('heartBox');
         function createHeart(){
             const heart = document.createElement('div');
             heart.className = 'heart';
             heart.innerHTML = '♥';
-            const size = Math.random()*22 + 28;
+            const size = Math.random()*20 + 26;
             heart.style.fontSize = size + 'px';
             heart.style.left = Math.random()*110 + '%';
             const duration = Math.random()*7 + 2;
@@ -235,7 +240,7 @@
             heartBox.appendChild(heart);
             setTimeout(()=>heart.remove(), duration * 1000);
         }
-        setInterval(createHeart, 100);
+        setInterval(createHeart, 130);
     </script>
 </body>
 </html>
