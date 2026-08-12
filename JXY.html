@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>七夕心愿兑换卡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffd6e0, #ffe8cc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .heart-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .heart {
+            position: absolute;
+            color: #ff7b9c;
+            animation: fall linear infinite;
+            opacity: 0.7;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .flip-wrap {
+            width: 100%;
+            max-width: 420px;
+            height: 660px;
+            perspective: 1200px;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .flip-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s ease-in-out;
+            transform-style: preserve-3d;
+        }
+        .flip-wrap.open .flip-card {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            box-shadow: 0 10px 30px rgba(255, 126, 159, 0.25);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 32px;
+            background: #fff;
+        }
+        .front-icon { font-size: 90px; margin-bottom: 20px; }
+        .front-tip { font-size: 20px; color: #d65c7b; }
+        .card-back { transform: rotateY(180deg); }
+        .card-title {
+            font-size: 26px;
+            color: #d65c7b;
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+        .decor-line {
+            width: 80px;
+            height: 2px;
+            background: #ffb6c1;
+            margin: 0 auto 25px;
+            border-radius: 1px;
+        }
+        .text-item {
+            font-size: 17px;
+            color: #444;
+            line-height: 2;
+            width: 100%;
+            text-align: left;
+        }
+        .blessing {
+            margin: 16px 0;
+            font-size: 15px;
+            color: #666;
+            line-height: 1.7;
+            text-align: center;
+        }
+        .input-box {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #d65c7b;
+            border-radius: 8px;
+            margin-top: 12px;
+            padding: 0 14px;
+            font-size: 16px;
+            outline: none;
+        }
+        .input-box:focus {
+            border-color: #ff7b9c;
+            box-shadow: 0 0 0 2px rgba(255,123,156,0.2);
+        }
+        .submit-btn{
+            margin-top:16px;
+            padding:10px 26px;
+            border:none;
+            background:#d65c7b;
+            color:#fff;
+            border-radius:8px;
+            font-size:16px;
+            cursor:pointer;
+        }
+        .submit-btn:active{ opacity:0.85; }
+        .submit-btn:disabled{ background:#bbb; cursor:not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="heart-container" id="heartBox"></div>
+    <div class="flip-wrap" id="cardWrap">
+        <div class="flip-card">
+            <div class="card-front">
+                <div class="front-icon">💌</div>
+                <div class="front-tip">点击打开</div>
+            </div>
+            <div class="card-back">
+                <div class="card-title">七夕心愿兑换卡</div>
+                <div class="decor-line"></div>
+                <div class="text-item">
+                    持有人：江心雁小宝宝<br>
+                    可兑换：心仪礼物<br>
+                    有效期：十万年
+                </div>
+                <div class="blessing">
+                    愿朝夕相伴，岁岁相依，<br>
+                    所有期待皆有回响，所有心愿终会抵达。
+                </div>
+                <input class="input-box" id="wishInput" placeholder="请填写心仪礼物">
+                <button class="submit-btn" id="submitBtn">提交心愿</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // =========替换为你的Railway接口地址=========
+        const apiUrl = "https://wish-api-production-d543.up.railway.app";
+        // ==========================================
+        const wrap = document.getElementById('cardWrap');
+        const wishInput = document.getElementById('wishInput');
+        const submitBtn = document.getElementById('submitBtn');
+        wrap.addEventListener('click', (e)=>{
+            if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON'){
+                wrap.classList.toggle('open');
+            }
+        })
+        // 本地缓存心愿
+        const savedWish = localStorage.getItem('wishGift');
+        if(savedWish) wishInput.value = savedWish;
+        wishInput.addEventListener('input', function(){
+            localStorage.setItem('wishGift', this.value);
+        });
+        // 提交请求
+        submitBtn.onclick = async function(){
+            const wish = wishInput.value.trim();
+            if(!wish){ alert("请先填写心仪礼物！"); return; }
+            submitBtn.disabled = true;
+            submitBtn.innerText = "提交中...";
+            try{
+                const res = await fetch(apiUrl,{
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({wish})
+                });
+                const data = await res.json();
+                if(data.success){
+                    alert("心愿提交成功！我已经收到啦");
+                }else{
+                    alert("提交失败："+data.msg);
+                }
+            }catch(err){
+                alert("网络出错，切换手机浏览器重试");
+            }
+            submitBtn.disabled = false;
+            submitBtn.innerText = "提交心愿";
+        }
+        // 爱心动画
+        const heartBox = document.getElementById('heartBox');
+        function createHeart(){
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '♥';
+            const size = Math.random()*22 + 28;
+            heart.style.fontSize = size + 'px';
+            heart.style.left = Math.random()*110 + '%';
+            const duration = Math.random()*7 + 2;
+            heart.style.animationDuration = duration + 's';
+            heartBox.appendChild(heart);
+            setTimeout(()=>heart.remove(), duration * 1000);
+        }
+        setInterval(createHeart, 100);
+    </script>
+</body>
+</html>
