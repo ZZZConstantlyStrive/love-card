@@ -2,14 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
     <title>七夕心愿兑换卡</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-text-size-adjust: 100%; /* 禁止苹果手机自动放大文字 */
         }
         body {
             min-height: 100vh;
@@ -17,7 +20,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             overflow: hidden;
         }
         .heart-container {
@@ -50,7 +53,7 @@
         .flip-wrap {
             width: 100%;
             max-width: 420px;
-            height: 660px;
+            max-height: 88vh; /* 核心：手机限制最大高度，不会超出屏幕 */
             perspective: 1200px;
             cursor: pointer;
             z-index: 2;
@@ -58,7 +61,8 @@
         .flip-card {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 0;
+            padding-bottom: 155%; /* 宽高比例，自适应屏幕替代固定660px */
             transition: transform 0.8s ease-in-out;
             transform-style: preserve-3d;
         }
@@ -67,6 +71,8 @@
         }
         .card-front, .card-back {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             border-radius: 22px;
@@ -76,55 +82,65 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px 32px;
+            padding: clamp(24px,5vw,40px) clamp(20px,4vw,32px);
             background: #fff;
+            -webkit-backface-visibility: hidden; /* Safari兼容 */
         }
-        .front-icon { font-size: 90px; margin-bottom: 20px; }
-        .front-tip { font-size: 20px; color: #d65c7b; }
-        .card-back { transform: rotateY(180deg); }
-        .card-title {
-            font-size: 26px;
+        .front-icon {
+            font-size: clamp(64px,14vw,90px);
+            margin-bottom: 16px;
+        }
+        .front-tip {
+            font-size: clamp(16px,4vw,20px);
             color: #d65c7b;
-            margin-bottom: 24px;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .card-title {
+            font-size: clamp(22px,5vw,26px);
+            color: #d65c7b;
+            margin-bottom: 20px;
             font-weight: bold;
         }
         .decor-line {
             width: 80px;
             height: 2px;
             background: #ffb6c1;
-            margin: 0 auto 25px;
+            margin: 0 auto 20px;
             border-radius: 1px;
         }
         .text-item {
-            font-size: 17px;
+            font-size: clamp(15px,3.6vw,17px);
             color: #444;
             line-height: 2;
             width: 100%;
             text-align: left;
         }
         .blessing {
-            margin: 16px 0;
-            font-size: 15px;
+            margin: 14px 0;
+            font-size: clamp(13px,3.2vw,15px);
             color: #666;
             line-height: 1.7;
             text-align: center;
         }
         .input-box {
             width: 100%;
-            height: 50px;
+            height: 48px;
             border: 1px solid #d65c7b;
             border-radius: 8px;
             margin-top: 12px;
             padding: 0 14px;
             font-size: 16px;
             outline: none;
+            background: #ffffff;
         }
         .input-box:focus {
             border-color: #ff7b9c;
             box-shadow: 0 0 0 2px rgba(255,123,156,0.2);
         }
         .submit-btn{
-            margin-top:16px;
+            margin-top:14px;
             padding:10px 26px;
             border:none;
             background:#d65c7b;
@@ -132,6 +148,7 @@
             border-radius:8px;
             font-size:16px;
             cursor:pointer;
+            transition: opacity 0.2s;
         }
         .submit-btn:active{ opacity:0.85; }
         .submit-btn:disabled{ background:#bbb; cursor:not-allowed; }
